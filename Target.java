@@ -1,7 +1,6 @@
 
 import java.util.ArrayList;
 import java.util.List;
-//生成最终代码
 public class Target {
     //全局变量表
     List<Global> globalmap;
@@ -17,14 +16,12 @@ public class Target {
 
     private void PutIn(int x,int length){
         for(int i = length-1 ; i >=0; i--){
-            //每次得到前面的8位
             int last = x >> (i * 8) & 0xFF;
             target.add((byte) last);
         }
     }
     private void PutIn(long x,int length){
         for(int i = length-1 ; i >=0; i--){
-            //每次得到前面的8位
             long last = x >> (i * 8) & 0xFF;
             target.add((byte) last);
         }
@@ -33,28 +30,23 @@ public class Target {
     private void PutIn(int x){
         int length=4;
         for(int i = length-1 ; i >=0; i--){
-            //每次得到前面的8位
             int last = x >> (i * 8) & 0xFF;
             target.add((byte) last);
         }
     }
-    //方法重写
     private void PutIn(long x){
         int length=8;
         for(int i = length-1 ; i >=0; i--){
-            //每次得到最前面的8位
             long last = x >> (i * 8) & 0xFF;
             target.add((byte) last);
         }
     }
-    //方法重写
     private void PutIn(String x){
         for(int i = 0 ; i < x.length(); i++){
             char b = x.charAt(i);
             target.add((byte)b);
         }
     }
-    //方法重写
     private void PutIn(Boolean x){
         if(x) target.add((byte)1);
         else target.add((byte)0);
@@ -63,23 +55,15 @@ public class Target {
     public List<Byte> out(){
         int magic=0x72303b3e;
         int version=0x00000001;
-        //magic
         PutIn(magic,4);
-        //version
         PutIn(version,4);
 
-        //globals.count
         PutIn(globalmap.size(),4);
         //全局变量表
         for(Global global:globalmap) outGlobal(global);
 
-        //直接把_start放进函数表
-        //functions.count
         PutIn(functionmap.size(),4);
-        //放_start
-        //outFunction(_start);
 
-        //放其他函数
         for(Function fun:functionmap) outFunction(fun);
         return target;
     }
@@ -120,7 +104,6 @@ public class Target {
             PutIn(op,1);
             //操作数
             if(instruction.x!= -1){
-                //只有push的操作数是64位
                 if(op==1)
                     PutIn(instruction.getX(),8);
                 else
