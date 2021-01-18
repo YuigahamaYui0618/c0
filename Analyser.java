@@ -37,7 +37,7 @@ public class Analyser {
     List<Instruction> instructionmap = new ArrayList<>();
 
     /**优先矩阵**/
-    //1表示优先级左比右高，2表示不可比，-1表示左比右低，0表示等
+    //1>，2error，-1<，0=
     int suan[][]={
             {1,1,-1,-1,1,1,1,1,1,1,-1,1,-1},
             {1,1,-1,-1,1,1,1,1,1,1,-1,1,-1},
@@ -185,7 +185,6 @@ public class Analyser {
         Gnum++;
     }
 
-    //??写完了
     /**声明语句*/
     private void analyseDeclStmt() throws CompileError {
         //decl_stmt -> let_decl_stmt | const_decl_stmt
@@ -196,8 +195,6 @@ public class Analyser {
         if(LEVEL==1) Gnum++;
         else Lnum++;
     }
-
-    //??改完了
     private void analyseLetDeclStmt() throws CompileError {
         //let_decl_stmt -> 'let' IDENT ':' ty ('=' expr)? ';'
         expect(TokenType.LET_KW);
@@ -242,7 +239,6 @@ public class Analyser {
         expect(TokenType.SEMICOLON);
     }
 
-    //??改完了
     private void analyseConstDeclStmt() throws CompileError {
         //const_decl_stmt -> 'const' IDENT ':' ty '=' expr ';'
         expect(TokenType.CONST_KW);
@@ -271,17 +267,16 @@ public class Analyser {
             instructionmap.add(ins);
         }
 
-        //不重复就放进去
         if(SearchByNameAdd(name)==-1) symbolmap.add(new Symbol(name,type,true,LEVEL,Lnum,Gnum,-1,-1));
         else throw new AnalyzeError(ErrorCode.Break,peekedToken.getEndPos());
 
         expect(TokenType.ASSIGN);
 
-        //类型不一致要报错
+        //类型不一致报错
         String type2=analyseExpr();
         if(!type.equals(type2)) throw new AnalyzeError(ErrorCode.Break,peekedToken.getEndPos());
 
-        //表达式运算后需要弹栈(把剩下的操作符的指令)
+        //表达式运算后弹栈
         popZ(type2);
 
         expect(TokenType.SEMICOLON);
@@ -289,8 +284,6 @@ public class Analyser {
         Instruction ins = new Instruction(Operation.store_64,0x17,-1);
         instructionmap.add(ins);
     }
-
-    //??改完了
     /**类型系统*/
     private Token analyseTy() throws CompileError {
         //ty -> IDENT 只能是void和int和double
@@ -306,7 +299,6 @@ public class Analyser {
 
 
     /**函数声明*/
-    //??改完了
     private void analyseFunction() throws CompileError {
         //function -> 'fn' IDENT '(' function_param_list? ')' '->' ty block_stmt
         expect(TokenType.FN_KW);
@@ -371,11 +363,10 @@ public class Analyser {
         globalmap.add(global);
     }
 
-    //??改完了
     private List<Symbol> analyseFunctionParamList() throws CompileError {
         //function_param_list -> function_param (',' function_param)*
         List<Symbol> n=new ArrayList<>();
-        //把参数加入参数列表,传入id编号
+        //把参数加入参数列表,传入id
         int i=0;
         n.add(analyseFunctionParam(i));
         while(check(TokenType.COMMA)){
@@ -386,7 +377,7 @@ public class Analyser {
         return n;
     }
 
-    //??改完了
+  
     private Symbol analyseFunctionParam(int paraid) throws CompileError {
         //function_param -> 'const'? IDENT ':' ty
         String type=" ";
@@ -403,7 +394,6 @@ public class Analyser {
         Token ty= analyseTy();
         type=(String)ty.getValue();
 
-        //?要给参数编号么?
         int level=LEVEL+1;
         Symbol param=new Symbol(name,type,isConst,level,-1,-1,Fnum,paraid);
         //System.out.println(name+level);
@@ -412,7 +402,6 @@ public class Analyser {
         return param;
     }
 
-     //??改完了，减号
     /**表达式*/
     private String analyseExpr() throws CompileError {
         //expr ->
@@ -484,7 +473,6 @@ public class Analyser {
         return type;
     }
 
-    //??改完了
     /**运算符表达式*/
     private void analyseBinaryOperator(String type) throws CompileError {
         //binary_operator -> '+' | '-' | '*' | '/' | '==' | '!=' | '<' | '>' | '<=' | '>='
@@ -509,7 +497,6 @@ public class Analyser {
         else throw new AnalyzeError(ErrorCode.Break,peekedToken.getStartPos());
     }
 
-    //??改完了
     private String analyseOperatorExpr(String typeLeft) throws CompileError {
         //operator_expr -> expr binary_operator expr
         //消除左递归
@@ -520,7 +507,6 @@ public class Analyser {
         else throw new AnalyzeError(ErrorCode.Break,peekedToken.getStartPos());
     }
 
-    //??改完了
     /**取反表达式*/
     private String analyseNegateExpr() throws CompileError {
         //negate_expr -> '-' expr
@@ -531,8 +517,6 @@ public class Analyser {
         if(type.equals("void")) throw new AnalyzeError(ErrorCode.Break,peekedToken.getStartPos());
         return type;
     }
-
-    //??改完了
     /**赋值表达式*/
     private String analyseAssignExpr(Symbol symbol,String typeLeft) throws CompileError {
         //assign_expr -> l_expr '=' expr
@@ -559,8 +543,6 @@ public class Analyser {
         if(typeLeft.equals(typeRight)&&(!typeLeft.equals("void"))) return "void";
         else throw new AnalyzeError(ErrorCode.Break,peekedToken.getStartPos());
     }
-
-    //??改完了
     /**类型转换表达式*/
     private String analyseAsExpr(String typeL) throws CompileError {
         //as_expr -> expr 'as' ty
@@ -585,8 +567,6 @@ public class Analyser {
     }
 
     /**函数调用表达式*/
-    //参数
-    //??改完了
     private void analyseCallParamList(Symbol function) throws CompileError {
         //call_param_list -> expr (',' expr)*
         int position =0;
@@ -618,7 +598,6 @@ public class Analyser {
     }
 
     //调用
-    //??改完了
     private String analyseCallExpr(Symbol function,boolean ku) throws CompileError {
         //call_expr -> IDENT '(' call_param_list? ')'
         //IDENT判断过了
@@ -661,7 +640,6 @@ public class Analyser {
         return function.getBack();
     }
 
-    //??改完了
     /**字面量表达式*/
     private String analyseLiteralExpr() throws CompileError {
         //literal_expr -> UINT_LITERAL | DOUBLE_LITERAL | STRING_LITERAL|CHAR_LITERAL
@@ -730,7 +708,6 @@ public class Analyser {
 
     }
 
-    //??改完了
     /**括号表达式*/
     private String analyseGroupExpr() throws CompileError {
         //group_expr -> '(' expr ')'
@@ -749,7 +726,6 @@ public class Analyser {
     }
 
     /**语句*/
-    //??改完了
     private void analyseStmt() throws CompileError {
         //stmt ->
         //      expr_stmt
@@ -795,7 +771,6 @@ public class Analyser {
     }
 
 
-    //??改完了
     /**表达式语句*/
     private void analyseExprStmt() throws CompileError {
         //expr_stmt -> expr ';'
@@ -805,7 +780,6 @@ public class Analyser {
         expect(TokenType.SEMICOLON);
     }
 
-    /**控制流语句*/
     //??改了点
     private void analyseIfStmt() throws CompileError {
         //if_stmt -> 'if' expr block_stmt ('else' (block_stmt | if_stmt))?
@@ -967,7 +941,6 @@ public class Analyser {
     }
     /**空语句*/
     private void analyseEmptyStmt() throws CompileError {
-        //empty_stmt -> ';'
         expect(TokenType.SEMICOLON);
     }
 
@@ -1032,8 +1005,6 @@ public class Analyser {
             n = symbolmap.get(i);
             if (n.level==LEVEL) symbolmap.remove(i);
         }
-        //System.out.println(symbolmap);
-        //System.out.println(LEVEL);
     }
 
     /**符号栈弹栈**/
