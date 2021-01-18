@@ -4,11 +4,9 @@ import java.util.List;
 public class Symbol {
     //名字
     String name;
-    /**类型
-     * 函数，变量类型,int,double,fun
-     */
+    //类型
     String type;
-    //是否是常量
+    //常量
     boolean isConst;
 
 
@@ -23,7 +21,7 @@ public class Symbol {
     int funid;
     //参数编号
     int paraid;
-    //参数列表？
+    //参数列表
     List<Symbol> param = new ArrayList<>();
 
 
@@ -45,7 +43,6 @@ public class Symbol {
         this.paraid=paraid;
     }
 
-    //函数构造如下
     public Symbol(String name,String type,List<Symbol> param,int level,String back){
         this.name=name;
         this.type=type;
