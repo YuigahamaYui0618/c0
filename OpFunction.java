@@ -111,7 +111,6 @@ public class OpFunction{
                 if(calculate.equals("int")) ins = new Instruction(Operation.cmp_i,0x30,-1);
                 else  ins = new Instruction(Operation.cmp_f,0x32,-1);
                 instructionsList.add(ins);
-                //不小于，大于等于
                 ins = new Instruction(Operation.set_lt,0x39,-1);
                 instructionsList.add(ins);
                 ins = new Instruction(Operation.not,0x2e,-1);
