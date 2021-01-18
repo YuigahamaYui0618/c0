@@ -16,9 +16,7 @@ public enum Operation{
     div_i,
     div_f,
     not,
-    //int大小比较
     cmp_i,
-    //浮点数大小比较
     cmp_f,
     neg_i,
     neg_f,
